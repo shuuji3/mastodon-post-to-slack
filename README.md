@@ -9,6 +9,6 @@ Prepare `.env`
 ```shell
 python3 -m vnev .venv
 . .venv/bin/activate
-pip install -r requrements.txt
+pip install -r requirements.txt
 python main.py
 ```

@@ -2,6 +2,7 @@ import json
 import os
 
 import feedparser
+from htmlslacker import HTMLSlacker
 import httpx
 
 SLACK_WEBHOOK_URL = os.environ['SLACK_WEBHOOK_URL']
@@ -11,7 +12,7 @@ MASTODON_USERNAME = os.environ['MASTODON_USERNAME']
 
 
 def make_payload(entry, username, icon_url):
-    summary = entry.summary
+    summary = HTMLSlacker(entry.summary).get_output()
 
     media_contents = entry.get('media_content')
     if media_contents:

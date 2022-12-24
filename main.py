@@ -3,6 +3,7 @@ import os
 import sqlite3
 from datetime import datetime
 from time import mktime
+import yaml
 
 import feedparser
 from htmlslacker import HTMLSlacker
@@ -10,12 +11,9 @@ import httpx
 
 SQLITE3_PATH = os.environ['SQLITE3_PATH']
 SLACK_WEBHOOK_URL = os.environ['SLACK_WEBHOOK_URL']
-SLACK_CHANNEL = os.environ['SLACK_CHANNEL']
-MASTODON_DOMAIN = os.environ['MASTODON_DOMAIN']
-MASTODON_USERNAME = os.environ['MASTODON_USERNAME']
 
 
-def make_payload(entry, username, icon_url):
+def make_payload(entry, username, icon_url, channel):
     summary = HTMLSlacker(entry.summary).get_output()
 
     media_contents = entry.get('media_content')
@@ -27,7 +25,7 @@ def make_payload(entry, username, icon_url):
     text = f'''{summary}{media_urls}'''
     return json.dumps(
         {
-            'channel': SLACK_CHANNEL,
+            'channel': channel,
             'username': username,
             'icon_url': icon_url,
             'text': text,
@@ -110,22 +108,28 @@ def main():
     con = sqlite3.connect(SQLITE3_PATH)
     prepare_db(con)
 
-    url = f'https://{MASTODON_DOMAIN}/@{MASTODON_USERNAME}.rss'
-    data = feedparser.parse(url)
+    config = yaml.load(open('config.yaml'), yaml.Loader)
+    for feed in config['feeds']:
+        domain = feed['domain']
+        username = feed['username']
+        channel = feed['channel']
 
-    user_id = f'{MASTODON_USERNAME}@{MASTODON_USERNAME}'
-    username = f'{data.feed.title} ({user_id})'
-    icon_url = data.feed.webfeeds_icon
+        url = f'https://{domain}/@{username}.rss'
+        data = feedparser.parse(url)
 
-    for entry in reversed(data.entries):
-        if not is_new_post(con, user_id, entry):
-            continue
+        user_id = f'{username}@{domain}'
+        username = f'{data.feed.title} ({user_id})'
+        icon_url = data.feed.webfeeds_icon
 
-        payload = make_payload(entry, username, icon_url)
-        response = post(payload)
-        if response.is_success:
-            published = get_published_datetime(entry)
-            update_latest_post(con, user_id, entry.id, published)
+        for entry in reversed(data.entries):
+            if not is_new_post(con, user_id, entry):
+                continue
+
+            payload = make_payload(entry, username, icon_url, channel)
+            response = post(payload)
+            if response.is_success:
+                published = get_published_datetime(entry)
+                update_latest_post(con, user_id, entry.id, published)
 
 
 if __name__ == '__main__':

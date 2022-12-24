@@ -1,0 +1,8 @@
+---
+feeds:
+  - domain: mastodon.social
+    username: mastodon
+    channel: general
+  - domain: fosstodon.org
+    username: ThePSF
+    channel: feed-python

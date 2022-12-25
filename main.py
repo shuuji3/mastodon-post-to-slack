@@ -33,7 +33,7 @@ def make_payload(entry, username, icon_url, channel):
     )
 
 
-def post(payload):
+def post_to_slack(payload):
     return httpx.post(SLACK_WEBHOOK_URL, data=payload)
 
 
@@ -126,7 +126,7 @@ def main():
                 continue
 
             payload = make_payload(entry, username, icon_url, channel)
-            response = post(payload)
+            response = post_to_slack(payload)
             if response.is_success:
                 published = get_published_datetime(entry)
                 update_latest_post(con, user_id, entry.id, published)

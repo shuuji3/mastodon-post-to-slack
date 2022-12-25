@@ -107,6 +107,15 @@ def get_published_datetime(entry):
     return datetime.fromtimestamp(mktime(entry.published_parsed))
 
 
+def make_feed_url(domain, username, feed_type):
+    match feed_type:
+        case 'with_replies':
+            url = f'https://{domain}/@{username}/with_replies.rss'
+        case _:
+            url = f'https://{domain}/@{username}.rss'
+    return url
+
+
 def main():
     con = sqlite3.connect(SQLITE3_PATH)
     prepare_db(con)
@@ -116,8 +125,9 @@ def main():
         domain = feed['domain']
         username = feed['username']
         channel = feed['channel']
+        feed_type = feed['type']
 
-        url = f'https://{domain}/@{username}.rss'
+        url = make_feed_url(domain, username, feed_type)
         data = feedparser.parse(url)
 
         user_id = f'{username}@{domain}'

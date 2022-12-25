@@ -6,3 +6,4 @@ feeds:
   - domain: fosstodon.org
     username: ThePSF
     channel: feed-python
+    type: with_replies

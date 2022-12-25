@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 import json
 import os
 import sqlite3
@@ -8,6 +9,8 @@ import yaml
 import feedparser
 from htmlslacker import HTMLSlacker
 import httpx
+
+load_dotenv()
 
 SQLITE3_PATH = os.environ['SQLITE3_PATH']
 SLACK_WEBHOOK_URL = os.environ['SLACK_WEBHOOK_URL']

@@ -25,7 +25,9 @@ def make_payload(entry, username, icon_url, channel):
     else:
         media_urls = ''
 
-    text = f'''{summary}{media_urls}'''
+    post_url = entry.id
+
+    text = f'''{summary}{media_urls}\n{post_url}'''
     return json.dumps(
         {
             'channel': channel,
